@@ -8,6 +8,8 @@
 DemoApp.demoController = SC.Object.create({
 
   people: [],
-  message: 'multi-line text box'
-
+  message: 'multi-line text box',
+  buttonClick: function(){
+    alert('wow...');
+  }
 });
