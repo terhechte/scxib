@@ -8,6 +8,6 @@
 DemoApp.demoController = SC.Object.create({
 
   people: [],
-  message: 'foobar'
+  message: 'multi-line text box'
 
 });
