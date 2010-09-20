@@ -8,6 +8,7 @@
     <xsl:param name="namespace" />
     <xsl:param name="panelName" />
     <xsl:param name="pageName" />
+    <xsl:param name="resourcesPath" />
 
     <!-- yes, one giant stylesheet because some(most, all?) browsers don't implement xsl:import/include -->
 
@@ -136,6 +137,30 @@
                             "<xsl:value-of select="./string[@key='value']" />"
                         </xsl:otherwise>
                     </xsl:choose>,
+                </xsl:for-each>
+            </xsl:if>
+		</xsl:for-each>
+    </xsl:template>
+    
+    <xsl:template name="kvValueForKey">
+        <xsl:param name="objectId" />
+        <xsl:param name="key" />
+        <xsl:for-each select="//object[@key='IBDocument.Objects']/*[@key='flattenedProperties']/*/*[@class='IBUserDefinedRuntimeAttributesPlaceholder']">
+            <xsl:if test="./reference/@ref = $objectId">
+                <xsl:for-each select="./*[@key='userDefinedRuntimeAttributes']/*[@class='IBUserDefinedRuntimeAttribute']">
+                    <xsl:if test="./string[@key='keyPath'] = $key">
+                        <xsl:choose>
+                            <xsl:when test="./real/@value">
+                                <xsl:value-of select="./real/@value" />
+                            </xsl:when>
+                            <xsl:when test="./boolean/@value">
+                                <xsl:value-of select="./boolean/@value" />
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:value-of select="./string[@key='value']" />
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:if>
                 </xsl:for-each>
             </xsl:if>
 		</xsl:for-each>
@@ -538,10 +563,13 @@
                 <xsl:with-param name="node" select="$node"/>
                 <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
             </xsl:call-template>
-            <xsl:call-template name="KeyValuePropertiesForObject">
-                <xsl:with-param name="objectId" select="$node/@id"/>
-            </xsl:call-template>
-            value: "<xsl:value-of select="'http://www.sproutcore.com/assets/images/logo.png'" />"
+            <xsl:variable name="url">
+                <xsl:call-template name="kvValueForKey">
+                    <xsl:with-param name="objectId" select="$node/@id"/>
+                    <xsl:with-param name="key" select="'value'"/>
+                </xsl:call-template>
+            </xsl:variable>
+            value:"<xsl:value-of select="$resourcesPath"/>images/<xsl:value-of select="normalize-space($url)"/>"
         }),
     </xsl:template>
 
@@ -643,10 +671,10 @@
                             <xsl:with-param name="node" select="$node"/>
                 <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
             </xsl:call-template>
+            value:
             <xsl:call-template name="KeyValuePropertiesForObject">
                 <xsl:with-param name="objectId" select="$node/@id"/>
             </xsl:call-template>
-            value: "http://www.sproutcore.com/"
         }),
     </xsl:template>
 

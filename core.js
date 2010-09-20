@@ -66,13 +66,16 @@ SCXIB = SC.Object.create(
 
       xsltProc = new XSLTProcessor();
       xsltProc.importStylesheet(xslDoc);
-
+      
       for (var p in opts) {
         if (opts.hasOwnProperty(p)) {
           xsltProc.setParameter(null, p, opts[p]);
         }
       }
-
+      
+      var rp = opts.url.substring(0, opts.url.lastIndexOf('/') + 1);
+      xsltProc.setParameter(null, 'resourcesPath', rp);
+      
       resDoc = xsltProc.transformToFragment(xibDoc, document);
 
       if (resDoc && resDoc.textContent) {
