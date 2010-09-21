@@ -185,7 +185,7 @@
     </xsl:template>
     
     <xsl:template name="DimensionsFromString">
-        <xsl:param name="layoutString"/>
+        <xsl:param name="layoutString"/>        
         <xsl:variable name="d1">
             <xsl:call-template name="str:replace">
                 <xsl:with-param name="search" select="'{'" />
@@ -209,7 +209,7 @@
     <xsl:template name="LayoutFromFrame">
         <xsl:param name="parentNodeRefId"/>
         <xsl:param name="node"/>
-        
+
         <xsl:variable name="layoutString">
            <xsl:value-of select="$node/string[@key='NSFrame']"/>
         </xsl:variable>
@@ -239,13 +239,13 @@
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        
+                
         <xsl:variable name="parentDimensions">
             <xsl:call-template name="DimensionsFromString">
                  <xsl:with-param name="layoutString" select="$fr"/>
              </xsl:call-template>
         </xsl:variable>
-
+                
          <xsl:variable name="top">
              <xsl:choose>
                  <xsl:when test="count(exsl:node-set($parentDimensions)/token) = 2">
@@ -263,17 +263,17 @@
          <xsl:variable name="parentHeight">
              <xsl:choose>
                  <xsl:when test="count(exsl:node-set($parentDimensions)/token) = 2">
-                     <xsl:value-of select="number(exsl:node-set($parentDimensions)/token[2])"/>
+                     <xsl:value-of select="number(normalize-space(exsl:node-set($parentDimensions)/token[2]))"/>
                 </xsl:when>
                 <xsl:when test="count(exsl:node-set($parentDimensions)/token) = 4">
-                    <xsl:value-of select="number(exsl:node-set($parentDimensions)/token[4])"/>
+                    <xsl:value-of select="number(normalize-space(exsl:node-set($parentDimensions)/token[4]))"/>
                 </xsl:when>
                 <xsl:otherwise>
                     <xsl:value-of select="0"/>
                 </xsl:otherwise>
             </xsl:choose>
-        </xsl:variable>
-
+        </xsl:variable>        
+        
         <xsl:if test="count(exsl:node-set($dimensions)/token) &gt; 0">
             layout: {
             <xsl:variable name="frame">
@@ -840,12 +840,21 @@
                <xsl:copy-of select="$replace" />
              </xsl:variable>
              <xsl:variable name="replacements-rtf">
-                <xsl:for-each select="exsl:node-set($search-nodes-rtf)/node()">
-                   <xsl:variable name="pos" select="position()" />
-                   <replace search="{.}">
-                      <xsl:copy-of select="exsl:node-set($replace-nodes-rtf)/node()[$pos]" />
-                   </replace>
-                </xsl:for-each>
+                 <xsl:choose>
+                     <xsl:when test="count(exsl:node-set($search-nodes-rtf)) &gt; 1">
+                         <xsl:for-each select="exsl:node-set($search-nodes-rtf)/node()">
+                             <xsl:variable name="pos" select="position()"/>
+                             <replace search="{.}">
+                                 <xsl:copy-of select="exsl:node-set($replace-nodes-rtf)/node()[$pos]"/>
+                             </replace>
+                         </xsl:for-each>
+                     </xsl:when>
+                     <xsl:otherwise>
+                         <replace search="{$search}">
+                             <xsl:copy-of select="$replace-nodes-rtf"/>
+                         </replace>
+                     </xsl:otherwise>
+                 </xsl:choose>
              </xsl:variable>
              <xsl:variable name="sorted-replacements-rtf">
                 <xsl:for-each select="exsl:node-set($replacements-rtf)/replace">
