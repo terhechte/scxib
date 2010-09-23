@@ -166,24 +166,6 @@
 		</xsl:for-each>
     </xsl:template>
     
-    <xsl:template name="bindings">
-        <xsl:param name="node"/>
-			<xsl:for-each select="//object[@key='IBDocument.Objects']/*[@key='connectionRecords']/*/*[@class='IBOutletConnection']">
-                <xsl:if test="./reference[@key='source']/@ref = $node/@id and $node/@class != 'NSCollectionView'">
-                    <xsl:variable name="destinationId" select="./reference[@key='destination']/@ref"/>
-                    <xsl:variable name="customClassId">
-                        <xsl:for-each select="//object[@key='IBDocument.Objects']/*[@key='objectRecords']/*/*[@class='IBObjectRecord']">
-                            <xsl:if test="$destinationId = ./reference[@key='object']/@ref"><xsl:value-of select="./int[@key='objectID']"/>.CustomClassName</xsl:if>
-                        </xsl:for-each>
-                    </xsl:variable>
-                    <xsl:if test="$customClassId">
-                        <!--TODO: make this link other types of bindings-->
-                        exampleView: <xsl:value-of select="$namespace"/>.<xsl:value-of select="//object[@key='IBDocument.Objects']/*[@key='flattenedProperties']/string[@key=$customClassId]"/>
-                    </xsl:if>
-                </xsl:if>
-    		</xsl:for-each>
-    </xsl:template>
-    
     <xsl:template name="DimensionsFromString">
         <xsl:param name="layoutString"/>        
         <xsl:variable name="d1">
@@ -641,10 +623,27 @@
             <xsl:call-template name="KeyValuePropertiesForObject">
                 <xsl:with-param name="objectId" select="$node/@id"/>
             </xsl:call-template>
-            <xsl:call-template name="bindings">
+            <xsl:call-template name="exampleView">
                 <xsl:with-param name="node" select="$node"/>
             </xsl:call-template>
         }),
+    </xsl:template>
+    
+    <xsl:template name="exampleView">
+        <xsl:param name="node"/>
+			<xsl:for-each select="//object[@key='IBDocument.Objects']/*[@key='connectionRecords']/*/*[@class='IBOutletConnection']">
+                <xsl:if test="./reference[@key='source']/@ref = $node/@id and ./string[@key='label'] = 'itemPrototype'">
+                    <xsl:variable name="destinationId" select="./reference[@key='destination']/@ref"/>
+                    <xsl:variable name="customClassId">
+                        <xsl:for-each select="//object[@key='IBDocument.Objects']/*[@key='objectRecords']/*/*[@class='IBObjectRecord']">
+                            <xsl:if test="$destinationId = ./reference[@key='object']/@ref"><xsl:value-of select="./int[@key='objectID']"/>.CustomClassName</xsl:if>
+                        </xsl:for-each>
+                    </xsl:variable>
+                    <xsl:if test="$customClassId and //object[@key='IBDocument.Objects']/*[@key='flattenedProperties']/string[@key=$customClassId]">
+                        exampleView: <xsl:value-of select="$namespace"/>.<xsl:value-of select="//object[@key='IBDocument.Objects']/*[@key='flattenedProperties']/string[@key=$customClassId]"/>
+                    </xsl:if>
+                </xsl:if>
+    		</xsl:for-each>
     </xsl:template>
 
     <xsl:template name="NSScrollView">
