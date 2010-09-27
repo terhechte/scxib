@@ -22,12 +22,7 @@
             </xsl:when>
             <xsl:when test="*[@key='IBDocument.RootObjects']/object[@class='NSWindowTemplate']/string[@key='NSWindowClass'] = 'NSPanel'">
                 <xsl:call-template name="Panel">
-                     <xsl:with-param name="panelNode" select="*[@key='IBDocument.RootObjects']/object[@class='NSWindowTemplate']/object[@key='NSWindowView']"/>
-                 </xsl:call-template>
-            </xsl:when>
-            <xsl:when test="*[@key='IBDocument.RootObjects']/object[@class='NSWindowTemplate']/string[@key='NSWindowClass'] = 'NSPanel'">
-                <xsl:call-template name="Panel">
-                     <xsl:with-param name="panelNode" select="*[@key='IBDocument.RootObjects']/object[@class='NSWindowTemplate']/object[@key='NSWindowView']"/>
+                     <xsl:with-param name="panelNode" select="*[@key='IBDocument.RootObjects']/object[@class='NSWindowTemplate']"/>
                  </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
@@ -329,6 +324,23 @@
         </xsl:if>
     </xsl:template>
 
+    <xsl:template name="LayoutFromRect">
+        <xsl:param name="layoutString"/>
+        <xsl:variable name="dimensions">
+            <xsl:call-template name="DimensionsFromString">
+                 <xsl:with-param name="layoutString" select="$layoutString"/>
+             </xsl:call-template>
+        </xsl:variable>
+        <xsl:if test="count(exsl:node-set($dimensions)/token) &gt; 0">
+            layout: {
+            bottom: <xsl:value-of select="exsl:node-set($dimensions)/token[2]"/>,
+            left: <xsl:value-of select="exsl:node-set($dimensions)/token[1]"/>,
+            width: <xsl:value-of select="exsl:node-set($dimensions)/token[3]"/>,
+            height: <xsl:value-of select="exsl:node-set($dimensions)/token[4]"/>
+            },
+        </xsl:if>
+    </xsl:template>
+
     <xsl:template name="ProcessTabs">
         <xsl:param name="nodes" />
         <xsl:for-each select="$nodes">
@@ -413,17 +425,19 @@
     <xsl:template name="Panel">
         <xsl:param name="panelNode"/>
         <xsl:call-template name="ProcessTabs">
-            <xsl:with-param name="nodes" select="$panelNode/*[@key='NSSubviews']/object" />
+            <xsl:with-param name="nodes" select="$panelNode/object[@key='NSWindowView']/*[@key='NSSubviews']/object" />
         </xsl:call-template>
-        <xsl:value-of select="$namespace"/>.<xsl:value-of select="$panelName"/> = SC.PanelPane.design({
-            <xsl:call-template name="LayoutFromFrame">
-                <xsl:with-param name="node" select="$windowNode"/>
+        <xsl:value-of select="$namespace"/>.<xsl:value-of select="$panelName"/> = SC.PanelPane.extend({
+            <xsl:call-template name="LayoutFromRect">
+                <xsl:with-param name="layoutString" select="$panelNode/string[@key='NSWindowRect']"/>
             </xsl:call-template>
-            childViews:[
-            <xsl:call-template name="ProcessNodes">
-                <xsl:with-param name="nodes" select="$panelNode/*[@key='NSSubviews']/object" />
-            </xsl:call-template>
-            ]
+            contentView: SC.View.extend({
+                childViews:[
+                <xsl:call-template name="ProcessNodes">
+                    <xsl:with-param name="nodes" select="$panelNode/object[@key='NSWindowView']/*[@key='NSSubviews']/object" />
+                </xsl:call-template>
+                ]
+            })
         });
     </xsl:template>
 
@@ -487,6 +501,9 @@
                     </xsl:if>
     		    </xsl:otherwise>
     		</xsl:choose>
+    		<xsl:if test="$node/object[@class='NSTextFieldCell']/int[@key='NSCellFlags'] = -1805517311">
+    		    isTextArea: YES,
+    		</xsl:if>
             <xsl:call-template name="LayoutFromFrame">
                 <xsl:with-param name="node" select="$node"/>
                 <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
@@ -743,16 +760,30 @@
     
     <xsl:template name="NSBox">
         <xsl:param name="node" />
-        SC.SeparatorView.design({
-        layoutDirection: 
-            <xsl:choose>
-                <xsl:when test="$node/int[@key='NSBoxType'] = 2">
-                    SC.LAYOUT_HORIZONTAL,
-                </xsl:when>
-                <xsl:otherwise>
-                    SC.LAYOUT_VERTICAL,
-                </xsl:otherwise>
-            </xsl:choose>
+        <xsl:choose>
+            <xsl:when test="$node/int[@key='NSBoxType'] = 2">
+                SC.SeparatorView.design({
+                    layoutDirection: SC.LAYOUT_HORIZONTAL,
+            </xsl:when>
+            <xsl:when test="$node/int[@key='NSBoxType'] = 1">
+                SC.SeparatorView.design({
+                    layoutDirection: SC.LAYOUT_VERTICAL,
+            </xsl:when>
+            <xsl:when test="$node/int[@key='NSBoxType'] = 0">
+                SC.ContainerView.design({
+                    classNames: ["sc-view","sc-tab-view"],
+                    contentView: SC.View.design({
+                        classNames: ["sc-view", "sc-container-view", "sc-black-border"],
+                        childViews: [
+                        <xsl:for-each select="$node/*[@key='NSSubviews']/object">
+                            <xsl:call-template name="ProcessNodes">
+                                <xsl:with-param name="nodes" select="."/>
+                            </xsl:call-template>
+                        </xsl:for-each>
+                        ],
+                    }),
+            </xsl:when>
+        </xsl:choose>
             <xsl:call-template name="LayoutFromFrame">
                 <xsl:with-param name="node" select="$node"/>
                 <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
@@ -760,7 +791,7 @@
             <xsl:call-template name="KeyValuePropertiesForObject">
                 <xsl:with-param name="objectId" select="$node/@id"/>
             </xsl:call-template>
-        }),
+            }),
     </xsl:template>
     
     <xsl:template name="NSClipView">

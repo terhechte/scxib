@@ -7,15 +7,23 @@
 
 DemoApp.main = function main() {
 
-  SCXIB.loadXibWithOptions(sc_static('MainPage.xib'), {
-    namespace: DemoApp.NAMESPACE,
-    callback: function () {
-      var people = DemoApp.store.find(DemoApp.Person);
-      DemoApp.demoController.set('people', people);
-      DemoApp.getPath('mainPage.mainPane').append();
-    }
-  });
-
+  SCXIB.loadXibsWithOptions([    
+    {
+      url: sc_static('MainPage.xib'),
+      namespace: DemoApp.NAMESPACE,
+      pageName: 'mainPage',
+      callback: function () {
+        var people = DemoApp.store.find(DemoApp.Person);
+        DemoApp.demoController.set('people', people);
+        DemoApp.getPath('mainPage.mainPane').append();
+      }
+    },    
+    {
+      url: sc_static('Panel1.xib'),
+      namespace: DemoApp.NAMESPACE,
+      panelName: 'arTestPane'
+    },
+  ]);
 };
 
 function main() { DemoApp.main(); }
