@@ -45,7 +45,8 @@ using a command line tool:
   - NSButton -> SC.ButtonView
   - NSPopUpButton -> SC.SelectFieldView
   - NSSegmentedControl -> SC.SegmentedView
-  - NSCollectionView -> SC.SourceListView
+  - NSCollectionView -> SC.ListView
+  - NSOutlineView -> SC.SourceListView
   - NSScrollView -> SC.ScrollView
   - NSWebView -> SC.WebView
   - NSMatrix -> SC.RadioView
