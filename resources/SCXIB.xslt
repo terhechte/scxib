@@ -63,11 +63,16 @@
                         <xsl:with-param name="node" select="$node"/>
                     </xsl:call-template>
                 </xsl:when>
-                <xsl:when test="$node[@class='NSCollectionView']">
-                    <xsl:call-template name="NSCollectionView">
+                <xsl:when test="$node[@class='NSSlider']">
+                    <xsl:call-template name="NSSlider">
                         <xsl:with-param name="node" select="$node"/>
                     </xsl:call-template>
                 </xsl:when>
+                <xsl:when test="$node[@class='NSProgressIndicator']">
+                    <xsl:call-template name="NSProgressIndicator">
+                        <xsl:with-param name="node" select="$node"/>
+                    </xsl:call-template>
+                </xsl:when>                
                 <xsl:when test="$node[@class='NSCollectionView']">
                     <xsl:call-template name="NSCollectionView">
                         <xsl:with-param name="node" select="$node"/>
@@ -75,6 +80,11 @@
                 </xsl:when>
                 <xsl:when test="$node[@class='NSOutlineView']">
                     <xsl:call-template name="NSOutlineView">
+                        <xsl:with-param name="node" select="$node"/>
+                    </xsl:call-template>
+                </xsl:when>
+                <xsl:when test="$node[@class='NSTableView']">
+                    <xsl:call-template name="NSTableView">
                         <xsl:with-param name="node" select="$node"/>
                     </xsl:call-template>
                 </xsl:when>
@@ -144,6 +154,9 @@
                             <xsl:value-of select="./boolean/@value" />
                         </xsl:when>
                         <xsl:when test="./string[@key='keyPath']='exampleView'">
+                            <xsl:value-of select="./string[@key='value']" />
+                        </xsl:when>
+                        <xsl:when test="./string[@key='keyPath']='recordType'">
                             <xsl:value-of select="./string[@key='value']" />
                         </xsl:when>
                         <xsl:otherwise>
@@ -624,6 +637,24 @@
             disableSort: YES
         }),
     </xsl:template>
+    
+    <xsl:template name="NSProgressIndicator">
+        <xsl:param name="node" />
+
+        SC.ProgressView.design({        
+            <xsl:call-template name="LayoutFromFrame">
+                            <xsl:with-param name="node" select="$node"/>
+                <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
+            </xsl:call-template>
+            <xsl:call-template name="KeyValuePropertiesForObject">
+                <xsl:with-param name="objectId" select="$node/@id"/>
+            </xsl:call-template>
+            minimum: 0, 
+            maximum: <xsl:value-of select="./double[@key='NSMaxValue']"/>,
+            value: 50,
+            isIndeterminate: YES
+        }),
+    </xsl:template>
 
     <xsl:template name="NSSegmentedControl">
         <xsl:param name="node" />
@@ -642,6 +673,24 @@
                 </xsl:for-each>
                 ]
         }),
+    </xsl:template>
+    
+    <xsl:template name="NSSlider">
+           <xsl:param name="node" />
+
+           SC.SliderView.design({        
+               <xsl:call-template name="LayoutFromFrame">
+                               <xsl:with-param name="node" select="$node"/>
+                   <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
+               </xsl:call-template>
+               <xsl:call-template name="KeyValuePropertiesForObject">
+                   <xsl:with-param name="objectId" select="$node/@id"/>
+               </xsl:call-template>
+               minimum:<xsl:value-of select="./object[@class='NSSliderCell']/double[@key='NSMinValue']"/>,
+               maximum:<xsl:value-of select="./object[@class='NSSliderCell']/double[@key='NSMaxValue']"/>,
+               value:<xsl:value-of select="./object[@class='NSSliderCell']/double[@key='NSValue']"/>,
+               steps:<xsl:value-of select="./object[@class='NSSliderCell']/double[@key='NSAltIncValue']"/>,
+           }),
     </xsl:template>
 
     <xsl:template name="NSOutlineView">
@@ -766,6 +815,49 @@
                         title: "<xsl:value-of select="./label"/>",
                         value: "<xsl:value-of select="./pageName"/>.mainView"
                     },
+                </xsl:for-each>
+                ],
+        }),
+    </xsl:template>
+    
+    <xsl:template name="NSTableView">
+        <xsl:param name="node" />
+        SC.TableView.design({
+            <xsl:call-template name="LayoutFromFrame">
+                            <xsl:with-param name="node" select="$node"/>
+                <xsl:with-param name="parentNodeRefId" select="$node/reference[@key='NSSuperview']/@ref"/>
+            </xsl:call-template>
+            <xsl:call-template name="KeyValuePropertiesForObject">
+                <xsl:with-param name="objectId" select="$node/@id"/>
+            </xsl:call-template>
+            <xsl:variable name="tableColumns">
+            <xsl:for-each select="$node/*[@key='NSTableColumns']/*[@class='NSTableColumn']">
+                    <tableColumn>
+                        <label>
+                            <xsl:value-of select="*[@class='NSTableHeaderCell']/string[@key='NSContents']" />
+                        </label>
+                        <width>
+                            <xsl:value-of select="double[@key='NSWidth']" />
+                        </width>
+                        <nodeid>
+                            <xsl:value-of select="@id"/>
+                        </nodeid>
+                        <identifier>
+                            <xsl:value-of select="string[@key='NSIdentifier']" />
+                        </identifier>
+                    </tableColumn>
+            </xsl:for-each>
+            </xsl:variable>
+            columns: [
+                <xsl:for-each select="exsl:node-set($tableColumns)/tableColumn">
+                    SC.TableColumn.create({
+                        label: "<xsl:value-of select="./label"/>",
+                        key: "<xsl:value-of select="./identifier"/>",
+                        width: <xsl:value-of select="./width"/>,
+                        <!-- <xsl:call-template name="KeyValuePropertiesForObject">
+                                                    <xsl:with-param name="objectId" select="./nodeid"/>
+                                                </xsl:call-template> -->
+                    }),
                 </xsl:for-each>
                 ],
         }),

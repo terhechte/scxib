@@ -44,6 +44,9 @@ using a command line tool:
   - NSCheckBox -> SC.CheckBoxView
   - NSButton -> SC.ButtonView
   - NSPopUpButton -> SC.SelectFieldView
+  - NSSlider -> SC.SliderView
+  - NSProgressIndicator -> SC.ProgressView (Preliminary, only indeterminate and
+    minimum value / current value are being ignored)
   - NSSegmentedControl -> SC.SegmentedView
   - NSCollectionView -> SC.ListView
   - NSOutlineView -> SC.SourceListView
@@ -51,6 +54,29 @@ using a command line tool:
   - NSWebView -> SC.WebView
   - NSMatrix -> SC.RadioView
   - NSTabView -> SC.TabView
+  - NSTableView -> SC.TableView (Requires Sproutcore 1.4+)
   - NSBox Horizontal/Vertical -> SC.SeparatorView:layoutDirection SC.LAYOUT\_HORIZONTAL/SC.LAYOUT\_VERTICAL
 
 [View the Demo Video]: http://www.vimeo.com/15064851
+
+
+### Class Documentation
+If you want to bind ListViews or TableViews to objects, you need to set a
+couple of different runtime parameters, as these bindings are currently not
+realized using the IB bindings tab. Here's a documentation of specific
+attributes for these objects:
+
+## NSCollectionView / SC.ListView:
+- exampleView: Can either be set as a runtime parameter, or subclassing an
+  NSCollectionViewItem to the SproutCore item name.
+
+## NSTableView / SC.TableView:
+- Support for NSTableView is preliminary. Many of the IB Flags aren't supported
+  yet.
+- exampleView: Mandatory. Set it as a runtime parameter. You have to set this, even if you
+  did not subclass in SC: exampleView: SC.TableRowView
+- row Key: The 'Identifier' field in the 'Table Column Attributes' Tab of the IB
+  Inspector
+- row Label: The 'Title' field in the 'Table Column Attributes' Tab of the IB
+  Inspector 
+
