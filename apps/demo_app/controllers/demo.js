@@ -19,5 +19,7 @@ DemoApp.demoController = SC.Object.create({
   
   close: function(){
     this.get('panel1').remove();
-  }
+  },
+  
+  radioItems: ['one', 'two', 'three']
 });

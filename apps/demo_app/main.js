@@ -24,6 +24,7 @@ DemoApp.main = function main() {
       panelName: 'arTestPane'
     },
   ]);
+  
 };
 
 function main() { DemoApp.main(); }
