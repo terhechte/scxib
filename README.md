@@ -60,17 +60,17 @@ using a command line tool:
 [View the Demo Video]: http://www.vimeo.com/15064851
 
 
-### Class Documentation
+## Class Documentation
 If you want to bind ListViews or TableViews to objects, you need to set a
 couple of different runtime parameters, as these bindings are currently not
 realized using the IB bindings tab. Here's a documentation of specific
 attributes for these objects:
 
-## NSCollectionView / SC.ListView:
+### NSCollectionView / SC.ListView:
 - exampleView: Can either be set as a runtime parameter, or subclassing an
   NSCollectionViewItem to the SproutCore item name.
 
-## NSTableView / SC.TableView:
+### NSTableView / SC.TableView:
 - Support for NSTableView is preliminary. Many of the IB Flags aren't supported
   yet.
 - exampleView: Mandatory. Set it as a runtime parameter. You have to set this, even if you
