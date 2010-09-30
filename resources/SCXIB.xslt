@@ -154,6 +154,12 @@
                         <xsl:when test="./string[@key='keyPath']='recordType'">
                             <xsl:value-of select="./string[@key='value']" />
                         </xsl:when>
+                        <!-- when setting individual controls to content, it
+                        needs to be without quotes. I wonder is this applies
+                        generally -->
+                        <xsl:when test="./string[@key='keyPath']='content'">
+                            <xsl:value-of select="./string[@key='value']" />
+                        </xsl:when>
                         <xsl:otherwise>
                             "<xsl:value-of select="./string[@key='value']" />"
                         </xsl:otherwise>
